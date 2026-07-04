@@ -41,16 +41,18 @@ Hot reload at http://localhost:5174
 | `npm test` | Run feature tests (16 assertions) |
 | `npm run test:ui` | Browser smoke tests (requires running server) |
 
-## Deploy
+## Deploy to GitHub Pages
 
-Static output in `dist/` — works on GitHub Pages, Vercel, Netlify, or any static host.
+1. Push this repo to GitHub
+2. Go to **Settings → Pages → Build and deployment**
+3. Set **Source** to **GitHub Actions** (not "Deploy from branch")
+4. Push to `main` — the `Deploy to GitHub Pages` workflow builds `dist/` and publishes it
 
-```bash
-npm run build
-# Deploy the dist/ folder
-```
+Your site will be at `https://<username>.github.io/<repo-name>/`
 
-`vite.config.js` uses `base: './'` for relative asset paths (GitHub Pages compatible).
+`vite.config.js` uses `base: './'` so relative asset paths work on project pages.
+
+For other hosts (Vercel, Netlify): `npm run build` and deploy the `dist/` folder.
 
 ## Tech stack
 
