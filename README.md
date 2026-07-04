@@ -1,34 +1,107 @@
 # PDF Toolkit
 
-A privacy-focused PDF toolkit that runs entirely in your browser. Merge, split, edit, convert, and protect PDFs — no uploads, no server.
+A privacy-focused PDF toolkit that runs entirely in the browser. Merge, split, organize,
+edit, convert, and protect PDFs — no uploads, no server, no accounts.
 
-![15 tools](https://img.shields.io/badge/tools-15-blue) ![license](https://img.shields.io/badge/license-MIT-green)
+![Vite](https://img.shields.io/badge/build-Vite-646CFF)
+![JavaScript](https://img.shields.io/badge/language-JavaScript-F7DF1E)
+![Tools](https://img.shields.io/badge/tools-15-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+
+## Overview
+
+PDF Toolkit is a single-page app with 15 PDF tools grouped into five categories:
+organize, edit, convert, security, and utilities. Every operation — parsing, editing,
+rendering, and re-saving the PDF — happens client-side in the browser using `pdf-lib`
+and `pdf.js`. Files never leave the device: there is no backend, no file upload
+endpoint, and no telemetry.
 
 ## Features
 
-- **15 tools** — merge, split, organize, rotate, extract, add text/image, signature, watermark, page numbers, JPG↔PDF, HTML→PDF, protect, crop
-- **100% local** — files never leave your device
-- **No account** — open and use immediately
-- **Dark UI** — polished, responsive interface
+- **Organize** — merge, split, reorder/rotate/delete pages, extract page ranges.
+- **Edit** — add text boxes, insert images, draw a signature, apply watermarks, add page numbers.
+- **Convert** — JPG ↔ PDF, HTML to PDF.
+- **Security** — password-protect a PDF with AES encryption.
+- **Utilities** — crop pages.
+- Drag-and-drop file input and page reordering (SortableJS).
+- Dark, responsive UI with no build-time theming step.
+- Fully static output — deployable to any static host at zero cost.
 
-## Quick start
+## How it works
 
-**Do not double-click `index.html`** — browsers block local apps loaded from disk.
+```
+  Browser
+  ───────
+  File input / drag-drop
+        │
+        ▼
+  pdf.js  ──── render pages, extract page images/text
+        │
+        ▼
+  pdf-lib ──── merge, split, rotate, crop, watermark, encrypt, rebuild the PDF
+        │
+        ▼
+  Blob → download                (nothing is sent to a server)
+```
+
+Each tool in `src/tools/` is an independent module that takes the loaded PDF (or images),
+performs one operation with `pdf-lib`/`pdf.js`/`jsPDF`, and returns a new file for download.
+The shell in `src/app.js` handles routing between tools and shares common UI/preview code
+from `src/utils/`.
+
+## Project structure
+
+```
+pdf-toolkit/
+├── index.html                 Entry point
+├── package.json               Scripts and dependencies
+├── vite.config.js             Build config (base: './' for static hosting)
+├── public/
+│   └── sw.js                  Service worker
+├── scripts/
+│   ├── serve.mjs              Local production server (npm start)
+│   ├── test-all-tools.mjs     Feature test suite (16 assertions)
+│   └── ui-check-all.mjs       Browser smoke tests (Playwright)
+├── src/
+│   ├── app.js                 Shell UI and routing
+│   ├── main.js                App entry point
+│   ├── style.css              Dark theme
+│   ├── tools/                 One module per tool (merge, split, watermark, protect, ...)
+│   │   └── registry.js        Tool catalog (categories, names, shortcuts)
+│   └── utils/                 PDF helpers, preview rendering, UI components
+├── test-fixtures/             Sample PDFs used by the test suite
+└── .github/workflows/         CI tests + GitHub Pages deploy
+```
+
+## Prerequisites
+
+- Node.js 18 or newer (includes npm).
+- A modern browser (Chrome, Edge, Firefox, Safari).
+
+## Quickstart
 
 ```bash
+git clone https://github.com/Hemanth-Chilakala/pdf-toolkit.git
+cd pdf-toolkit
 npm install
 npm start
 ```
 
-Open the URL printed in the terminal (default: http://localhost:5174)
+Open the URL printed in the terminal (default `http://localhost:5174`). Do not open
+`index.html` directly by double-clicking it — browsers block local apps loaded from disk.
 
-### Development
+For hot-reload during development:
 
 ```bash
 npm run dev
 ```
 
-Hot reload at http://localhost:5174
+## Usage
+
+1. Pick a tool from the categorized grid (Organize, Edit, Convert, Security, Utilities).
+2. Drag in a PDF (or images, for JPG-to-PDF/HTML-to-PDF).
+3. Adjust the tool's options (page ranges, rotation, watermark text/opacity, password, etc.).
+4. Download the result — the file is generated and saved locally; nothing is uploaded.
 
 ## Scripts
 
@@ -41,40 +114,27 @@ Hot reload at http://localhost:5174
 | `npm test` | Run feature tests (16 assertions) |
 | `npm run test:ui` | Browser smoke tests (requires running server) |
 
-## Deploy to GitHub Pages
+## Deployment
 
-1. Push this repo to GitHub
-2. Go to **Settings → Pages → Build and deployment**
-3. Set **Source** to **GitHub Actions** (not "Deploy from branch")
-4. Push to `main` — the `Deploy to GitHub Pages` workflow builds `dist/` and publishes it
+The repo includes a GitHub Actions workflow that builds and deploys to GitHub Pages on
+every push to `main` (set **Settings → Pages → Source** to **GitHub Actions** once).
+`vite.config.js` uses `base: './'` so the same build works unmodified on Vercel, Netlify,
+or any static host — just run `npm run build` and deploy the `dist/` folder.
 
-Your site will be at `https://<username>.github.io/<repo-name>/`
+## Verification
 
-`vite.config.js` uses `base: './'` so relative asset paths work on project pages.
+- `npm test` runs 16 feature assertions across the tool set against the sample PDFs in
+  `test-fixtures/` (verified passing).
+- `npm run test:ui` drives the built app with Playwright for browser smoke tests.
+- Manually exercised merge, split, watermark, protect, and JPG-to-PDF in the browser to
+  confirm downloads open correctly and page content is preserved.
 
-For other hosts (Vercel, Netlify): `npm run build` and deploy the `dist/` folder.
+## Privacy
 
-## Tech stack
-
-- [Vite](https://vitejs.dev/) — build tooling
-- [pdf-lib](https://pdf-lib.js.org/) — PDF creation and editing
-- [pdf.js](https://mozilla.github.io/pdf.js/) — PDF rendering
-- [html2canvas](https://html2canvas.hertzen.com/) + [jsPDF](https://github.com/parallax/jsPDF) — HTML to PDF
-- [SortableJS](https://sortablejs.github.io/Sortable/) — drag-and-drop reordering
-
-## Project structure
-
-```
-├── public/           Service worker
-├── scripts/        Tests and local server
-├── src/
-│   ├── app.js      Shell UI and routing
-│   ├── tools/      One module per tool (15)
-│   └── utils/      PDF helpers, UI components, preview guard
-├── test-fixtures/  Sample PDFs for tests
-└── index.html      Entry point
-```
+No file a user opens in this app is ever transmitted anywhere. All PDF parsing, editing,
+and generation happens in-memory in the browser tab; closing the tab discards everything.
+There is no server component, database, or analytics.
 
 ## License
 
-MIT — see [LICENSE](LICENSE)
+Released under the [MIT License](LICENSE).
