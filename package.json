@@ -1,0 +1,27 @@
+{
+  "name": "pdf-toolkit",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "start": "node scripts/serve.mjs",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "node scripts/test-all-tools.mjs",
+    "test:ui": "node scripts/ui-check-all.mjs",
+    "test:ci": "npm run build && npm test && npm start & npx wait-on http://localhost:5174 && npm run test:ui"
+  },
+  "dependencies": {
+    "html2canvas": "^1.4.1",
+    "jspdf": "^2.5.2",
+    "jszip": "^3.10.1",
+    "pdf-lib": "^1.17.1",
+    "pdfjs-dist": "^4.10.38",
+    "sortablejs": "^1.15.6"
+  },
+  "devDependencies": {
+    "playwright": "^1.61.1",
+    "vite": "^6.2.0"
+  }
+}
