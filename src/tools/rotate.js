@@ -1,11 +1,12 @@
 import { PDFDocument, degrees } from '../utils/pdf.js';
-import { loadPdfDocument, renderPagePreview, downloadBytes, parsePageRange } from '../utils/pdf.js';
+import { loadPdfDocument, renderPagePreview, downloadBytes, parsePageRange, deriveFilename } from '../utils/pdf.js';
 import { createDropzone, runWithProgress, showToast, el, escapeHtml } from '../utils/ui.js';
 import { createPreviewGuard } from '../utils/preview.js';
 
 export function renderRotate(container) {
   let pdfData = null;
   const preview = createPreviewGuard();
+  let gridGen = 0;
 
   container.innerHTML = '';
   container.appendChild(createDropzone('.pdf,application/pdf', false, async ([file]) => {
@@ -65,7 +66,7 @@ export function renderRotate(container) {
 
     const selected = new Set();
     const grid = workspace.querySelector('#page-grid');
-    let thumbGen = 0;
+    const thumbGen = ++gridGen;
 
     function showPreview(idx) {
       workspace.querySelector('#preview-label').textContent = `Page ${idx + 1}`;
@@ -82,13 +83,12 @@ export function renderRotate(container) {
       card.appendChild(meta);
       grid.appendChild(card);
 
-      const thumbId = ++thumbGen;
       renderPagePreview(pdfData.bytes, i).then((c) => {
-        if (thumbId !== thumbGen || !thumb.isConnected) return;
+        if (thumbGen !== gridGen || !thumb.isConnected) return;
         thumb.innerHTML = '';
         thumb.appendChild(c);
       }).catch(() => {
-        if (thumbId !== thumbGen || !thumb.isConnected) return;
+        if (thumbGen !== gridGen || !thumb.isConnected) return;
         thumb.innerHTML = '<span class="loading">Error</span>';
       });
 
@@ -151,7 +151,7 @@ export function renderRotate(container) {
           page.setRotation(degrees(current + rot));
         }
         const result = await newDoc.save();
-        downloadBytes(result, 'rotated.pdf');
+        downloadBytes(result, deriveFilename(pdfData.file.name, 'rotated'));
         showToast('PDF rotated!');
       });
     });

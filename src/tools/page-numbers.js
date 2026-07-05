@@ -1,5 +1,5 @@
 import { PDFDocument, rgb, StandardFonts } from '../utils/pdf.js';
-import { loadPdfDocument, renderPagePreview, downloadBytes } from '../utils/pdf.js';
+import { loadPdfDocument, renderPagePreview, downloadBytes, deriveFilename } from '../utils/pdf.js';
 import { createDropzone, runWithProgress, showToast, el, escapeHtml } from '../utils/ui.js';
 import { createPreviewGuard } from '../utils/preview.js';
 
@@ -156,7 +156,7 @@ export function renderPageNumbers(container) {
         }
 
         const result = await doc.save();
-        downloadBytes(result, 'numbered.pdf');
+        downloadBytes(result, deriveFilename(pdfData.file.name, 'numbered'));
         showToast('Page numbers added!');
       });
     });

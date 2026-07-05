@@ -1,5 +1,5 @@
 import { PDFDocument } from '../utils/pdf.js';
-import { loadPdfDocument, renderPagePreview, downloadBytes } from '../utils/pdf.js';
+import { loadPdfDocument, renderPagePreview, downloadBytes, deriveFilename } from '../utils/pdf.js';
 import { createDropzone, runWithProgress, showToast, el, escapeHtml } from '../utils/ui.js';
 import { createPreviewGuard } from '../utils/preview.js';
 
@@ -7,6 +7,7 @@ export function renderExtract(container) {
   let pdfData = null;
   const selected = new Set();
   const preview = createPreviewGuard();
+  let gridGen = 0;
 
   container.innerHTML = '';
   container.appendChild(createDropzone('.pdf,application/pdf', false, async ([file]) => {
@@ -50,7 +51,7 @@ export function renderExtract(container) {
 
     const grid = workspace.querySelector('#page-grid');
     const extractBtn = workspace.querySelector('#extract-btn');
-    let thumbGen = 0;
+    const thumbGen = ++gridGen;
 
     function updateUI() {
       const bar = workspace.querySelector('#sel-bar');
@@ -77,13 +78,12 @@ export function renderExtract(container) {
       card.appendChild(meta);
       grid.appendChild(card);
 
-      const thumbId = ++thumbGen;
       renderPagePreview(pdfData.bytes, i).then((c) => {
-        if (thumbId !== thumbGen || !thumb.isConnected) return;
+        if (thumbGen !== gridGen || !thumb.isConnected) return;
         thumb.innerHTML = '';
         thumb.appendChild(c);
       }).catch(() => {
-        if (thumbId !== thumbGen) return;
+        if (thumbGen !== gridGen) return;
         thumb.innerHTML = '<span class="loading">Error</span>';
       });
 
@@ -116,7 +116,7 @@ export function renderExtract(container) {
         const copied = await newDoc.copyPages(pdfData.doc, indices);
         copied.forEach((p) => newDoc.addPage(p));
         const result = await newDoc.save();
-        downloadBytes(result, 'extracted-pages.pdf');
+        downloadBytes(result, deriveFilename(pdfData.file.name, 'extracted'));
         showToast(`Extracted ${indices.length} page(s)!`);
       });
     });

@@ -1,4 +1,5 @@
-import { PDFDocument, loadPdfDocument, downloadBytes } from '../utils/pdf.js';
+import { PDFDocument as EncryptablePDFDocument } from 'pdf-lib-plus-encrypt';
+import { loadPdfDocument, downloadBytes, deriveFilename } from '../utils/pdf.js';
 import { createDropzone, runWithProgress, showToast, el, escapeHtml } from '../utils/ui.js';
 
 export function renderProtect(container) {
@@ -84,8 +85,8 @@ export function renderProtect(container) {
       }
 
       await runWithProgress(async () => {
-        const doc = await PDFDocument.load(pdfData.bytes);
-        const result = await doc.save({
+        const doc = await EncryptablePDFDocument.load(pdfData.bytes);
+        await doc.encrypt({
           userPassword: userPass,
           ownerPassword: ownerPass,
           permissions: {
@@ -94,7 +95,8 @@ export function renderProtect(container) {
             modifying: false,
           },
         });
-        downloadBytes(result, 'protected.pdf');
+        const result = await doc.save();
+        downloadBytes(result, deriveFilename(pdfData.file.name, 'protected'));
         showToast('PDF protected with AES encryption!');
       }, 'Encrypting PDF...');
     });

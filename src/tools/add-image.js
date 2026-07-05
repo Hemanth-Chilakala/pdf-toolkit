@@ -1,5 +1,5 @@
 import { PDFDocument } from '../utils/pdf.js';
-import { loadPdfDocument, renderPagePreview, embedImage, downloadBytes } from '../utils/pdf.js';
+import { loadPdfDocument, renderPagePreview, embedImage, downloadBytes, deriveFilename } from '../utils/pdf.js';
 import { createDropzone, runWithProgress, showToast, el, escapeHtml } from '../utils/ui.js';
 import { icon } from '../utils/icons.js';
 import { createPreviewGuard, revokeBlobUrl, getEditorClickPercent } from '../utils/preview.js';
@@ -261,7 +261,7 @@ export function renderAddImage(container) {
         }
 
         const result = await doc.save();
-        downloadBytes(result, 'image-added.pdf');
+        downloadBytes(result, deriveFilename(pdfData.file.name, 'image-added'));
         showToast('Images added!');
       });
     });

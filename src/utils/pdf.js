@@ -98,6 +98,12 @@ export function downloadBytes(bytes, filename) {
   downloadBlob(blob, filename);
 }
 
+/** Builds "name-suffix.pdf" from a source filename, stripping its extension. */
+export function deriveFilename(sourceName, suffix) {
+  const base = sourceName.replace(/\.pdf$/i, '');
+  return `${base}-${suffix}.pdf`;
+}
+
 export async function embedImage(pdfDoc, imageBytes, type) {
   if (type === 'png' || imageBytes[0] === 0x89) {
     return pdfDoc.embedPng(imageBytes);

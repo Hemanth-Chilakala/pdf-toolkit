@@ -17,6 +17,7 @@
     "jspdf": "^2.5.2",
     "jszip": "^3.10.1",
     "pdf-lib": "^1.17.1",
+    "pdf-lib-plus-encrypt": "^1.1.0",
     "pdfjs-dist": "^4.10.38",
     "sortablejs": "^1.15.6"
   },

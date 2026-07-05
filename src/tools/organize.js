@@ -1,5 +1,5 @@
 import { PDFDocument, degrees } from '../utils/pdf.js';
-import { loadPdfDocument, renderPagePreview, downloadBytes } from '../utils/pdf.js';
+import { loadPdfDocument, renderPagePreview, downloadBytes, deriveFilename } from '../utils/pdf.js';
 import { createDropzone, makeSortable, runWithProgress, showToast, el } from '../utils/ui.js';
 import { createPreviewGuard } from '../utils/preview.js';
 
@@ -206,7 +206,7 @@ export function renderOrganize(container) {
           newDoc.addPage(copied);
         }
         const result = await newDoc.save();
-        downloadBytes(result, 'organized.pdf');
+        downloadBytes(result, deriveFilename(pdfData.file.name, 'organized'));
         showToast('PDF saved!');
       });
     });

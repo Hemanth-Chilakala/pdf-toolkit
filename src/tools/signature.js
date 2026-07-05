@@ -1,5 +1,5 @@
 import { PDFDocument } from '../utils/pdf.js';
-import { loadPdfDocument, renderPagePreview, embedImage, downloadBytes } from '../utils/pdf.js';
+import { loadPdfDocument, renderPagePreview, embedImage, downloadBytes, deriveFilename } from '../utils/pdf.js';
 import { createDropzone, runWithProgress, showToast, el } from '../utils/ui.js';
 import { createPreviewGuard, getEditorClickPercent } from '../utils/preview.js';
 
@@ -266,7 +266,7 @@ export function renderSignature(container) {
 
         page.drawImage(img, { x, y, width: w, height: h });
         const result = await doc.save();
-        downloadBytes(result, 'signed.pdf');
+        downloadBytes(result, deriveFilename(pdfData.file.name, 'signed'));
         showToast('Signature applied!');
       });
     });

@@ -7,6 +7,7 @@ export function renderPdfToJpg(container) {
   let pdfData = null;
   const preview = createPreviewGuard();
   const thumbUrls = [];
+  let pdfToJpgGen = 0;
 
   container.innerHTML = '';
   container.appendChild(createDropzone('.pdf,application/pdf', false, async ([file]) => {
@@ -55,7 +56,7 @@ export function renderPdfToJpg(container) {
     `;
 
     const grid = workspace.querySelector('#page-grid');
-    let thumbGen = 0;
+    const thumbGen = ++pdfToJpgGen;
     let exportPage = 0;
     const exportSingleBtn = workspace.querySelector('#export-single');
 
@@ -68,14 +69,13 @@ export function renderPdfToJpg(container) {
       card.appendChild(meta);
       grid.appendChild(card);
 
-      const thumbId = ++thumbGen;
       pdfPageToImage(pdfData.bytes, i, 0.5).then((blob) => {
-        if (thumbId !== thumbGen || !thumb.isConnected) return;
+        if (thumbGen !== pdfToJpgGen || !thumb.isConnected) return;
         const url = URL.createObjectURL(blob);
         thumbUrls.push(url);
         thumb.innerHTML = `<img src="${url}" alt="Page ${i + 1}" />`;
       }).catch(() => {
-        if (thumbId !== thumbGen || !thumb.isConnected) return;
+        if (thumbGen !== pdfToJpgGen || !thumb.isConnected) return;
         thumb.innerHTML = '<span class="loading">Error</span>';
       });
 

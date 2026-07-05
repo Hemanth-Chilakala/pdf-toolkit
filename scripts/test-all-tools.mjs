@@ -4,6 +4,7 @@
  */
 import { readFileSync } from 'fs';
 import { PDFDocument, degrees, rgb, StandardFonts } from 'pdf-lib';
+import { PDFDocument as EncryptablePDFDocument } from 'pdf-lib-plus-encrypt';
 import JSZip from 'jszip';
 import { jsPDF } from 'jspdf';
 
@@ -227,18 +228,27 @@ async function testHtmlToPdf() {
 }
 
 async function testProtect() {
-  const doc = await PDFDocument.load(sample);
-  const encrypted = await doc.save({
+  const doc = await EncryptablePDFDocument.load(sample);
+  await doc.encrypt({
     userPassword: 'secret123',
-    ownerPassword: 'secret123',
+    ownerPassword: 'ownerSecret456',
     permissions: { printing: 'highResolution', copying: false, modifying: false },
   });
+  const encrypted = await doc.save();
   if (encrypted.length < 500) throw new Error('encrypt output too small');
-  // pdf-lib can reload its own encrypted output when password is supplied
-  const unlocked = await PDFDocument.load(encrypted, { password: 'secret123' });
-  if (unlocked.getPageCount() !== doc.getPageCount()) {
-    throw new Error('encrypted pdf page count mismatch after unlock');
+  if (!Buffer.from(encrypted).toString('latin1').includes('/Encrypt')) {
+    throw new Error('saved pdf has no /Encrypt dictionary');
   }
+
+  // Loading without ignoreEncryption must fail — proves the output is genuinely encrypted,
+  // not just carrying password fields pdf-lib silently ignores.
+  let rejectedWithoutIgnoring = false;
+  try {
+    await EncryptablePDFDocument.load(encrypted);
+  } catch {
+    rejectedWithoutIgnoring = true;
+  }
+  if (!rejectedWithoutIgnoring) throw new Error('encrypted pdf was loadable without acknowledging encryption');
 }
 
 async function testCrop() {

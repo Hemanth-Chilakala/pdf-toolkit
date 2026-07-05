@@ -108,7 +108,8 @@ export function renderJpgToPdf(container) {
           }
 
           const result = await doc.save();
-          downloadBytes(result, 'images.pdf');
+          const baseName = images[0].file.name.replace(/\.\w+$/, '');
+          downloadBytes(result, images.length > 1 ? `${baseName}+${images.length - 1}-more.pdf` : `${baseName}.pdf`);
           showToast('PDF created!');
         });
       });

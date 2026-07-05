@@ -1,5 +1,5 @@
 import { PDFDocument, rgb, StandardFonts } from '../utils/pdf.js';
-import { loadPdfDocument, renderPagePreview, downloadBytes } from '../utils/pdf.js';
+import { loadPdfDocument, renderPagePreview, downloadBytes, deriveFilename } from '../utils/pdf.js';
 import { createDropzone, runWithProgress, showToast, el, escapeHtml } from '../utils/ui.js';
 import { createPreviewGuard, getEditorClickPercent } from '../utils/preview.js';
 
@@ -217,7 +217,7 @@ export function renderAddText(container) {
         }
 
         const result = await doc.save();
-        downloadBytes(result, 'text-added.pdf');
+        downloadBytes(result, deriveFilename(pdfData.file.name, 'text-added'));
         showToast('Text added successfully!');
       });
     });

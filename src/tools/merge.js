@@ -1,5 +1,5 @@
 import { PDFDocument } from '../utils/pdf.js';
-import { loadPdfBytes, getPageCount, renderPagePreview, downloadBytes } from '../utils/pdf.js';
+import { loadPdfBytes, getPageCount, renderPagePreview, downloadBytes, deriveFilename } from '../utils/pdf.js';
 import { createDropzone, makeSortable, runWithProgress, showToast, el, escapeHtml } from '../utils/ui.js';
 import { icon } from '../utils/icons.js';
 import { createPreviewGuard } from '../utils/preview.js';
@@ -131,7 +131,7 @@ export function renderMerge(container) {
         copied.forEach((page) => merged.addPage(page));
       }
       const result = await merged.save();
-      downloadBytes(result, 'merged.pdf');
+      downloadBytes(result, deriveFilename(files[0].file.name, `merged-${files.length}-files`));
       showToast('PDF merged successfully!');
     }, 'Merging PDFs...');
   });

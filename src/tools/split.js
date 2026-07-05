@@ -1,5 +1,5 @@
 import { PDFDocument } from '../utils/pdf.js';
-import { loadPdfDocument, renderPagePreview, downloadBytes, parsePageRange } from '../utils/pdf.js';
+import { loadPdfDocument, renderPagePreview, downloadBytes, parsePageRange, deriveFilename } from '../utils/pdf.js';
 import { createDropzone, runWithProgress, showToast, el, escapeHtml } from '../utils/ui.js';
 import { createPreviewGuard } from '../utils/preview.js';
 
@@ -7,6 +7,7 @@ export function renderSplit(container) {
   let pdfData = null;
   const selected = new Set();
   const preview = createPreviewGuard();
+  let gridGen = 0;
 
   container.innerHTML = '';
   container.appendChild(createDropzone('.pdf,application/pdf', false, async ([file]) => {
@@ -56,7 +57,7 @@ export function renderSplit(container) {
     `;
 
     const grid = workspace.querySelector('#page-grid');
-    let thumbGen = 0;
+    const thumbGen = ++gridGen;
 
     function showPreview(idx) {
       workspace.querySelector('#preview-label').textContent = `— Page ${idx + 1}`;
@@ -75,13 +76,12 @@ export function renderSplit(container) {
       card.appendChild(meta);
       grid.appendChild(card);
 
-      const tid = ++thumbGen;
       renderPagePreview(pdfData.bytes, i).then((c) => {
-        if (tid !== thumbGen || !thumb.isConnected) return;
+        if (thumbGen !== gridGen || !thumb.isConnected) return;
         thumb.innerHTML = '';
         thumb.appendChild(c);
       }).catch(() => {
-        if (tid !== thumbGen) return;
+        if (thumbGen !== gridGen) return;
         thumb.innerHTML = '<span class="loading">Error</span>';
       });
 
@@ -126,7 +126,7 @@ export function renderSplit(container) {
         return;
       }
       const indices = [...selected].sort((a, b) => a - b);
-      extractPages(indices, 'extracted.pdf');
+      extractPages(indices, deriveFilename(file.name, 'split'));
     });
 
     workspace.querySelector('#split-range').addEventListener('click', () => {
@@ -136,7 +136,7 @@ export function renderSplit(container) {
         showToast('Invalid page range', 'error');
         return;
       }
-      extractPages(indices, 'split.pdf');
+      extractPages(indices, deriveFilename(file.name, 'split'));
     });
   }
 }
