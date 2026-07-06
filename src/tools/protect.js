@@ -1,4 +1,5 @@
-import { PDFDocument as EncryptablePDFDocument } from 'pdf-lib-plus-encrypt';
+import * as pdfLibPlusEncrypt from 'pdf-lib-plus-encrypt';
+const EncryptablePDFDocument = pdfLibPlusEncrypt.PDFDocument || pdfLibPlusEncrypt.default?.PDFDocument;
 import { loadPdfDocument, downloadBytes, deriveFilename } from '../utils/pdf.js';
 import { createDropzone, runWithProgress, showToast, el, escapeHtml } from '../utils/ui.js';
 
