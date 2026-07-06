@@ -4,7 +4,8 @@
  */
 import { readFileSync } from 'fs';
 import { PDFDocument, degrees, rgb, StandardFonts } from 'pdf-lib';
-import { PDFDocument as EncryptablePDFDocument } from 'pdf-lib-plus-encrypt';
+import pdfLibPlusEncrypt from 'pdf-lib-plus-encrypt';
+const { PDFDocument: EncryptablePDFDocument } = pdfLibPlusEncrypt;
 import JSZip from 'jszip';
 import { jsPDF } from 'jspdf';
 
